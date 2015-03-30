@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8">
     <script src="js/react.js"></script>
     <script src="js/JSXTransformer.js"></script>
     <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -9,30 +10,44 @@
     <div id="canvas"></div>
 
     <script type="text/jsx">
+        var SizeForm = React.createClass({
+            render: function() {
+                return <div><label>Сп:</label><input type='text' /></div>;
+            }
+        });
+
         var Graphic = React.createClass({ 
 
           componentDidMount: function() {
-            var context = this.getDOMNode().getContext('2d');
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+
             this.paint(context);
           },
 
           componentDidUpdate: function() {
-            var context = this.getDOMNode().getContext('2d');
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
             context.clearRect(0, 0, 200, 200);
             this.paint(context);
           },
 
           paint: function(context) {
             context.save();
-            context.translate(100, 100);
-            context.rotate(this.props.rotation, 100, 100);
-            context.fillStyle = '#F00';
-            context.fillRect(-50, -50, 100, 100);
-            context.restore();
+            context.strokeStyle = '#ff0000';
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(5, 5);
+            context.lineTo(450, 5);
+            context.stroke();
           },
 
           render: function() {
-            return <canvas width={200} height={200} />;
+            return ( 
+                <div className='canvas-bg'>
+                    <canvas id='canvas' width={200} height={200} />
+                </div>
+            );
           }
 
         });
@@ -53,7 +68,12 @@
           },
 
           render: function() {
-            return <div><Graphic rotation={this.state.rotation} /></div>
+            return (
+                <div>
+                    <div><SizeForm /></div>
+                    <div><Graphic /></div>
+                </div>
+            );
           }
 
         });
