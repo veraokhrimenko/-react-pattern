@@ -40,17 +40,25 @@
             }
         });
 
-        React.render(
-            <SVGComponent height="100%" width="100%">
-                <Pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
-                    <Path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" />
-                </Pattern>
-                <Pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-                    <Rectangle width="80" height="80" fill="url(#smallGrid)"/>
-                    <Path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
-                </Pattern>
+        var Grid = React.createClass({
+            render: function() {
+                return  <SVGComponent height="100%" width="100%">
+                            <Pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
+                                <Path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" />
+                            </Pattern>
+                            <Pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+                                <Rectangle width="80" height="80" fill="url(#smallGrid)"/>
+                                <Path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+                            </Pattern>
 
-                <Rectangle width="100%" height="100%" fill="url(#grid)" /></SVGComponent>,
+                            <Rectangle width="100%" height="100%" fill="url(#grid)" />
+                        </SVGComponent>
+            }
+        });
+
+
+        React.render(
+            <Grid />,
             document.getElementById('svg')
         );
     </script>
