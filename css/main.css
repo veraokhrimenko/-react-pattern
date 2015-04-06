@@ -1,0 +1,11 @@
+html {
+/*	background: url('../images/background.jpg');
+	background-position: left top;
+	background-repeat: no-repeat;
+	background-size: cover;
+	opacity : 0.2;*/
+}
+
+.canvas-bg {
+	background: url('../images/rsz_grid.gif') left top repeat;
+}
