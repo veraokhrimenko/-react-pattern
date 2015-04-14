@@ -4,63 +4,111 @@
         <meta charset="UTF-8">
         <script src="js/react.js"></script>
         <script src="js/JSXTransformer.js"></script>
+        <script src="js/reflux.min.js"></script>
         <link rel="stylesheet" type="text/css" href="css/main.css">
     </head>
     <body>
-    <div id="svg"></div>
+        <div id="form"></div>
+        <div id="svg"></div>
 
-    <script type="text/jsx">
-        var Rectangle = React.createClass({
-            render: function() {
-                return <rect {...this.props}>{this.props.children}</rect>;
-            }
-        });
+        <script type="text/jsx">
+            var valueUpdate = Reflux.createAction();
 
-        var Line = React.createClass({
-            render: function() {
-                return <line {...this.props}>{this.props.children}</line>;
-            }
-        });
+            var valueStore = Reflux.createStore({
+                init: function() {
+                    this.listenTo(valueUpdate, this.output);
+                },
+                output: function(flag) {
+                    this.trigger(flag);
+                }
 
-        var SVGComponent = React.createClass({
-            render: function() {
-                return <svg {...this.props}>{this.props.children}</svg>;
-            }
-        });
+            });
 
-        var Pattern = React.createClass({
-            render: function() {
-                return <pattern {...this.props}>{this.props.children}</pattern>;
-            }
-        });
+            var MeasurementsForm = React.createClass({
+                handleChange: function(event) {
+                    valueUpdate(event.target.value);
+                },
+                render: function() {
+                    return <form>
+                                <input type="text" placeholder="Cт" onChange={this.handleChange} />
+                                <input type="text" placeholder="Ди" />
+                           </form>
+                }
+            });
 
-        var Path = React.createClass({
-            render: function() {
-                return <path {...this.props}>{this.props.children}</path>;
-            }
-        });
+            var Rectangle = React.createClass({
+                render: function() {
+                    return <rect {...this.props}>{this.props.children}</rect>;
+                }
+            });
 
-        var Grid = React.createClass({
-            render: function() {
-                return  <SVGComponent height="100%" width="100%">
-                            <Pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
-                                <Path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5" />
-                            </Pattern>
-                            <Pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-                                <Rectangle width="80" height="80" fill="url(#smallGrid)"/>
-                                <Path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
-                            </Pattern>
+            var Line = React.createClass({
+                render: function() {
+                    return <line {...this.props}>{this.props.children}</line>;
+                }
+            });
 
-                            <Rectangle width="100%" height="100%" fill="url(#grid)" />
-                        </SVGComponent>
-            }
-        });
+            var SVGComponent = React.createClass({
+                render: function() {
+                    return <svg {...this.props}>{this.props.children}</svg>;
+                }
+            });
+
+            var Pattern = React.createClass({
+                render: function() {
+                    return <pattern {...this.props}>{this.props.children}</pattern>;
+                }
+            });
+
+            var Path = React.createClass({
+                render: function() {
+                    return <path {...this.props}>{this.props.children}</path>
+                }
+            });
+
+            var TopLine = React.createClass({
+                componentDidMount: function() {
+                    valueStore.listen(this.drowLine);
+                },
+                drowLine: function() {
+                    console.log(2)
+                //     <path d="M 300 0 
+                //        Q 300 300 0 300" stroke="blue"
+                // stroke-width="5" fill="transparent"  />
+                },
+                render: function() {
+                    return <path {...this.props}>{this.props.children}</path>;
+                }
+            });
+
+            var Grid = React.createClass({
+                render: function() {
+                    return  <SVGComponent height="100%" width="100%">
+                                <text x="-20" y="-10">O</text>
+                                <TopLine />
+                                <Pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                    <Path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5" />
+                                </Pattern>
+                                <Pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+                                    <Rectangle width="100" height="100" fill="url(#smallGrid)"/>
+                                    <Path d="M 100 0 L 0 0 0 100" fill="none" stroke="gray" stroke-width="1"/>
+                                </Pattern>
+
+                                <Rectangle width="100%" height="100%" fill="url(#grid)" />
+                            </SVGComponent>
+                }
+            });
 
 
-        React.render(
-            <Grid />,
-            document.getElementById('svg')
-        );
-    </script>
-  </body>
+            React.render(
+                <MeasurementsForm />,
+                document.getElementById('form')
+            );
+
+            React.render(
+                <Grid />,
+                document.getElementById('svg')
+            )
+        </script>
+    </body>
 </html>
