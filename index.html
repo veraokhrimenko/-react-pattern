@@ -67,17 +67,18 @@
             });
 
             var TopLine = React.createClass({
+                getInitialState: function(){
+                    return { length: 0 };
+                },
                 componentDidMount: function() {
                     valueStore.listen(this.drowLine);
                 },
-                drowLine: function() {
-                    console.log(2)
-                //     <path d="M 300 0 
-                //        Q 300 300 0 300" stroke="blue"
-                // stroke-width="5" fill="transparent"  />
+                drowLine: function(value) {
+                    value = value * 10;
+                    this.setState({ length: "M " + value + " 0 Q " + value + " " + value + " 0 " + value });
                 },
                 render: function() {
-                    return <path {...this.props}>{this.props.children}</path>;
+                    return <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>;
                 }
             });
 
