@@ -12,26 +12,34 @@
         <div id="svg"></div>
 
         <script type="text/jsx">
-            var valueUpdate = Reflux.createAction();
+            var topLineUpdate = Reflux.createAction();
+            var bottomLineUpdate = Reflux.createAction();
 
-            var valueStore = Reflux.createStore({
+            var linesStore = Reflux.createStore({
                 init: function() {
-                    this.listenTo(valueUpdate, this.output);
+                    this.listenTo(topLineUpdate, this.topLineUpdated);
+                    this.listenTo(bottomLineUpdate, this.bottomLineUpdated);
                 },
-                output: function(flag) {
-                    this.trigger(flag);
+                topLineUpdated: function(value) {
+                    this.trigger(value);
+                },
+                bottomLineUpdated: function(value) {
+                    this.trigger(value);
                 }
 
             });
 
             var MeasurementsForm = React.createClass({
-                handleChange: function(event) {
-                    valueUpdate(event.target.value);
+                setTopLine: function(event) {
+                    topLineUpdate(event.target.value);
+                },
+                setBottomLine: function(event) {
+                    bottomLineUpdate(event.target.value);
                 },
                 render: function() {
                     return <form>
-                                <input type="text" placeholder="Cт" onChange={this.handleChange} />
-                                <input type="text" placeholder="Ди" />
+                                <input type="text" pattern= "[0-9]" placeholder="Cт" onChange={this.setTopLine} />
+                                <input type="text" placeholder="Ди" onChange={this.setBottomLine} />
                            </form>
                 }
             });
@@ -71,22 +79,51 @@
                     return { length: 0 };
                 },
                 componentDidMount: function() {
-                    valueStore.listen(this.drowLine);
+                    linesStore.listen(this.drowLine);
                 },
                 drowLine: function(value) {
-                    value = value * 10;
+                    value = 0.64 * (+value + 1) * 10;
                     this.setState({ length: "M " + value + " 0 Q " + value + " " + value + " 0 " + value });
                 },
                 render: function() {
-                    return <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>;
+                    return (
+                        <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>
+                    )
                 }
             });
+
+            var Lines = React.createClass({
+                getInitialState: function(){
+                    return { lines: [] };
+                },
+                componentDidMount: function() {
+                    linesStore.listenTo(topLineUpdate, this.drowLine);
+                    linesStore.listenTo(bottomLineUpdate, this.drowLine);
+                },
+                drowLine: function(value) {
+                    value = 0.64 * (+value + 1) * 10;
+                    var length = "M " + value + " 0 Q " + value + " " + value + " 0 " + value;
+                    this.setState({ lines: this.state.lines.concat({length: length }) });
+                },
+                render: function() {
+                    var lines = this.state.lines.map(function(p){
+                        return <path d={p.length} stroke="blue" stroke-width="5" fill="transparent"></path>
+                    });
+
+                    return (
+                        <g>
+                        {lines}
+                        </g>
+                    )
+                }
+            });
+
 
             var Grid = React.createClass({
                 render: function() {
                     return  <SVGComponent height="100%" width="100%">
                                 <text x="-20" y="-10">O</text>
-                                <TopLine />
+                                <Lines />
                                 <Pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
                                     <Path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5" />
                                 </Pattern>
