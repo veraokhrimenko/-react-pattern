@@ -12,34 +12,37 @@
         <div id="svg"></div>
 
         <script type="text/jsx">
-            var topLineUpdate = Reflux.createAction();
-            var bottomLineUpdate = Reflux.createAction();
+            var drawSketch = Reflux.createAction();
+
 
             var linesStore = Reflux.createStore({
                 init: function() {
-                    this.listenTo(topLineUpdate, this.topLineUpdated);
-                    this.listenTo(bottomLineUpdate, this.bottomLineUpdated);
+                    this.listenTo(drawSketch, this.triggerEvent);
                 },
-                topLineUpdated: function(value) {
-                    this.trigger(value);
-                },
-                bottomLineUpdated: function(value) {
+                triggerEvent: function(value) {
                     this.trigger(value);
                 }
 
             });
 
             var MeasurementsForm = React.createClass({
+                getInitialState: function(){
+                    return { ct: 0, di: 0 };
+                },
                 setTopLine: function(event) {
-                    topLineUpdate(event.target.value);
+                    this.setState({ ct: event.target.value })
                 },
                 setBottomLine: function(event) {
-                    bottomLineUpdate(event.target.value);
+                    this.setState({ di: event.target.value })
+                },
+                drawSketch: function() {
+                    drawSketch(this.state)
                 },
                 render: function() {
                     return <form>
-                                <input type="text" pattern= "[0-9]" placeholder="Cт" onChange={this.setTopLine} />
+                                <input type="text" pattern= "[0-9]{2}" placeholder="Cт" onChange={this.setTopLine} />
                                 <input type="text" placeholder="Ди" onChange={this.setBottomLine} />
+                                <div onClick={this.drawSketch}>draw Sketch</div>
                            </form>
                 }
             });
@@ -74,45 +77,51 @@
                 }
             });
 
-            var TopLine = React.createClass({
-                getInitialState: function(){
-                    return { length: 0 };
-                },
-                componentDidMount: function() {
-                    linesStore.listen(this.drowLine);
-                },
-                drowLine: function(value) {
-                    value = 0.64 * (+value + 1) * 10;
-                    this.setState({ length: "M " + value + " 0 Q " + value + " " + value + " 0 " + value });
-                },
-                render: function() {
-                    return (
-                        <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>
-                    )
-                }
-            });
+            // var TopLine = React.createClass({
+            //     getInitialState: function(){
+            //         return { length: 0 };
+            //     },
+            //     componentDidMount: function() {
+            //         linesStore.listenTo(topLineUpdate, this.drowLine);
+            //     },
+            //     drowLine: function(value) {
+            //         value = 0.64 * (+value + 1) * 10;
+
+            //         this.setState({ length: "M " + value + " 0 Q " + value + " " + value + " 0 " + value });
+            //     },
+            //     render: function() {
+            //         return (
+            //             <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>
+            //         )
+            //     }
+            // });
 
             var Lines = React.createClass({
                 getInitialState: function(){
                     return { lines: [] };
                 },
                 componentDidMount: function() {
-                    linesStore.listenTo(topLineUpdate, this.drowLine);
-                    linesStore.listenTo(bottomLineUpdate, this.drowLine);
+                    linesStore.listenTo(drawSketch, this.drawSketch);
                 },
-                drowLine: function(value) {
-                    value = 0.64 * (+value + 1) * 10;
-                    var length = "M " + value + " 0 Q " + value + " " + value + " 0 " + value;
-                    this.setState({ lines: this.state.lines.concat({length: length }) });
+                drawSketch: function(value) {
+                    var ct = 0.64 * (+value.ct + 1) * 10;
+                    var di = ct + value.di*10;
+
+                    var topLine = "M " + ct + " 0 Q " + ct + " " + ct + " 0 " + ct;
+                    var bottomLine = "M " + di + " 0 Q " + di + " " + di + " 0 " + di;
+                    var connectionLines = [[ "M" + ct + " 0 L" + di + " 0"], [ "M0 " + ct + " L0 " + di ]];
+
+
+                    this.setState({ lines: [ topLine, bottomLine ].concat(connectionLines) });
                 },
                 render: function() {
                     var lines = this.state.lines.map(function(p){
-                        return <path d={p.length} stroke="blue" stroke-width="5" fill="transparent"></path>
+                        return <path d={p} stroke="blue" stroke-width="5" fill="transparent"></path>
                     });
 
                     return (
                         <g>
-                        {lines}
+                            {lines}
                         </g>
                     )
                 }
