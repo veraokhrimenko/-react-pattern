@@ -14,7 +14,6 @@
         <script type="text/jsx">
             var drawSketch = Reflux.createAction();
 
-
             var linesStore = Reflux.createStore({
                 init: function() {
                     this.listenTo(drawSketch, this.triggerEvent);
@@ -77,25 +76,6 @@
                 }
             });
 
-            // var TopLine = React.createClass({
-            //     getInitialState: function(){
-            //         return { length: 0 };
-            //     },
-            //     componentDidMount: function() {
-            //         linesStore.listenTo(topLineUpdate, this.drowLine);
-            //     },
-            //     drowLine: function(value) {
-            //         value = 0.64 * (+value + 1) * 10;
-
-            //         this.setState({ length: "M " + value + " 0 Q " + value + " " + value + " 0 " + value });
-            //     },
-            //     render: function() {
-            //         return (
-            //             <path d={this.state.length} stroke="blue" stroke-width="5" fill="transparent"></path>
-            //         )
-            //     }
-            // });
-
             var Lines = React.createClass({
                 getInitialState: function(){
                     return { lines: [] };
@@ -107,21 +87,54 @@
                     var ct = 0.64 * (+value.ct + 1) * 10;
                     var di = ct + value.di*10;
 
-                    var topLine = "M " + ct + " 0 Q " + ct + " " + ct + " 0 " + ct;
-                    var bottomLine = "M " + di + " 0 Q " + di + " " + di + " 0 " + di;
-                    var connectionLines = [[ "M" + ct + " 0 L" + di + " 0"], [ "M0 " + ct + " L0 " + di ]];
+                    var topLine = { length: "M " + ct + " 0 Q " + ct + " " + ct + " 0 " + ct, color: 'blue' };
+                    var topLineUp = { length: "M " + ct + " 0 Q " + (ct - 20) + " " + (ct - 20) + " 0 " + ct, color: 'red' };
+                    var bottomLine = { length: "M " + di + " 0 Q " + di + " " + di + " 0 " + di,  color: 'red' };
+                    var connectionLines = [ { length: "M" + ct + " 0 L" + di + " 0",  color: 'red' },  {length: "M0 " + ct + " L0 " + di ,  color: 'red' }];
 
 
-                    this.setState({ lines: [ topLine, bottomLine ].concat(connectionLines) });
+                    this.setState({ lines: [ topLine, topLineUp, bottomLine ].concat(connectionLines) });
                 },
                 render: function() {
+                    console.log(this.state.lines)
                     var lines = this.state.lines.map(function(p){
-                        return <path d={p} stroke="blue" stroke-width="5" fill="transparent"></path>
+                        return <path d={p.length} stroke={p.color} stroke-width="5" fill="transparent"></path>
                     });
 
                     return (
                         <g>
                             {lines}
+                        </g>
+                    )
+                }
+            });
+
+            var Letters = React.createClass({
+                getInitialState: function(){
+                    return { letters: [] };
+                },
+                componentDidMount: function() {
+                    linesStore.listenTo(drawSketch, this.setLetters);
+                },
+                setLetters: function(value) {
+                    console.log(2)
+                    var ct = 0.64 * (+value.ct + 1) * 10;
+                    var di = ct + value.di*10;
+
+                    var T = { x: -20, y: ct, value: "T" },
+                        T1 = { x: ct, y: -10, value: "T1" }
+
+
+                    this.setState({ letters: [ T, T1 ]});
+                },
+                render: function() {
+                    var letters = this.state.letters.map(function(p){
+                        return <text x={p.x} y={p.y}>{p.value}</text>
+                    });
+
+                    return (
+                        <g>
+                            {letters}
                         </g>
                     )
                 }
@@ -133,6 +146,7 @@
                     return  <SVGComponent height="100%" width="100%">
                                 <text x="-20" y="-10">O</text>
                                 <Lines />
+                                <Letters />
                                 <Pattern id="smallGrid" width="10" height="10" patternUnits="userSpaceOnUse">
                                     <Path d="M 10 0 L 0 0 0 10" fill="none" stroke="gray" stroke-width="0.5" />
                                 </Pattern>
